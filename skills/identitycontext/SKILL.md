@@ -1,6 +1,6 @@
 ---
 name: identitycontext
-description: Authenticate hosted Context application CLIs through id.pocketcontext.com and inspect or revoke the local shared identity session. Pilot applications are WikiContext and NotifyContext. Does not grant application memberships or replace operator account administration.
+description: Authenticate hosted Context application CLIs through id.pocketcontext.com and inspect or revoke the local shared identity session. Supported applications are WikiContext, NotifyContext, TaskContext, DealContext and VaultContext. Does not grant application memberships or replace operator account administration.
 ---
 
 # IdentityContext
@@ -22,7 +22,7 @@ terminal/background process whose tool timeout permits the human step.
 
 Successful sign-in caches only a revocable identity session under
 `~/.local/state/pocketcontext-id/` (or `$XDG_STATE_HOME/pocketcontext-id/`), with
-private permissions. WikiContext and NotifyContext can reuse it. Session renewal
+private permissions. WikiContext, NotifyContext, TaskContext, DealContext and VaultContext can reuse it. Session renewal
 never opens a browser automatically. The server limits idle life to seven days
 and absolute life to thirty days. Application authorization remains independent.
 

@@ -26,8 +26,9 @@ token after approval. Refresh cannot extend that token.
    issues a random shared session. Five incorrect attempts exhaust the request;
    concurrent redemption succeeds once. Only token/code hashes are persisted.
 4. POST `/api/identity/assertion` with `Authorization: Bearer <shared token>` and
-   an exact `audience`: `https://wiki.pocketcontext.com` or
-   `https://notify.pocketcontext.com`. Each request checks the current account,
+   an exact `audience`: `https://wiki.pocketcontext.com`,
+   `https://notify.pocketcontext.com`, `https://tasks.pocketcontext.com`,
+   `https://crm.pocketcontext.com` or `https://vault.pocketcontext.com`. Each request checks the current account,
    token-key generation, idle expiry and absolute expiry before signing.
 5. Exchange that assertion at the application's
    `/api/context/auth-with-assertion`. The application preserves its own account,
@@ -60,7 +61,7 @@ The `pocketcontext-identity` Python package exports `IdentityError`,
 `NoSessionError`, `login(email, no_browser=False, timeout=180)`,
 `assertion(email, audience)` and `logout(email)`. Login reuses a validated shared
 session when possible. Assertion renewal never opens a browser. Production
-issuer and pilot audiences are fixed; HTTP redirects never forward credentials.
+issuer and application audiences are fixed; HTTP redirects never forward credentials.
 The package uses Python's standard library and runs on Linux and macOS.
 
 Shared sessions live under `$XDG_STATE_HOME/pocketcontext-id/` (default

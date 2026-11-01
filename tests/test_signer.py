@@ -28,7 +28,12 @@ class Signing(unittest.TestCase):
             self.assertEqual(details.signing_algorithm,'SHA_256_RSA_PKCS1_V1_5');self.assertEqual(details.message_type,'DIGEST')
             signature=self.key.sign(base64.b64decode(details.message),padding.PKCS1v15(),utils.Prehashed(hashes.SHA256()))
             return SimpleNamespace(data=SimpleNamespace(key_version_id='version1',signature=base64.b64encode(signature).decode()))
-        with patch.dict(sys.modules,{'oci':self.oci}):jwt=signer.sign(self.claims,SimpleNamespace(sign=sign))
+        with patch.dict(sys.modules,{'oci':self.oci}):
+            for audience in ('https://wiki.pocketcontext.com','https://notify.pocketcontext.com','https://tasks.pocketcontext.com','https://crm.pocketcontext.com','https://vault.pocketcontext.com'):
+                jwt=signer.sign({**self.claims,'aud':audience},SimpleNamespace(sign=sign))
+                header,payload,signature=jwt.split('.')
+                self.key.public_key().verify(base64.urlsafe_b64decode(signature+'='*(-len(signature)%4)),(header+'.'+payload).encode(),padding.PKCS1v15(),hashes.SHA256())
+                self.assertEqual(json.loads(base64.urlsafe_b64decode(payload+'='*(-len(payload)%4)))['aud'],audience)
         header,payload,signature=jwt.split('.')
         self.key.public_key().verify(base64.urlsafe_b64decode(signature+'='*(-len(signature)%4)),(header+'.'+payload).encode(),padding.PKCS1v15(),hashes.SHA256())
         self.assertEqual(json.loads(base64.urlsafe_b64decode(header+'='*(-len(header)%4)))['kid'],'version1')

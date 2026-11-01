@@ -19,7 +19,8 @@ import urllib.request
 import webbrowser
 
 ORIGIN = 'https://id.pocketcontext.com'
-AUDIENCES = {'https://wiki.pocketcontext.com', 'https://notify.pocketcontext.com'}
+AUDIENCES = {'https://wiki.pocketcontext.com', 'https://notify.pocketcontext.com',
+                 'https://tasks.pocketcontext.com', 'https://crm.pocketcontext.com', 'https://vault.pocketcontext.com'}
 
 
 class IdentityError(Exception):

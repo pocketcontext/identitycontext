@@ -1,5 +1,5 @@
 const ORIGIN = 'https://id.pocketcontext.com';
-const AUDIENCES = ['https://wiki.pocketcontext.com','https://notify.pocketcontext.com'];
+const AUDIENCES = ['https://wiki.pocketcontext.com','https://notify.pocketcontext.com','https://tasks.pocketcontext.com','https://crm.pocketcontext.com','https://vault.pocketcontext.com'];
 function now(){return Math.floor(Date.now()/1000);}
 function hash(value){return $security.sha256(value);}
 function input(e){

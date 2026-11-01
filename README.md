@@ -1,12 +1,12 @@
 # IdentityContext
 
-Hosted CLI sign-in for WikiContext and NotifyContext at https://id.pocketcontext.com. IdentityContext uses PocketContext and its default users collection. Read docs/protocol.md for the protocol and deployment contract.
+Hosted CLI sign-in for WikiContext, NotifyContext, TaskContext, DealContext and VaultContext at https://id.pocketcontext.com. IdentityContext uses PocketContext and its default users collection. Read docs/protocol.md for the protocol and deployment contract.
 
 ## Develop and validate
 
 Install with `uv pip install -e .` or build with `uv build`. The client command is
 `identitycontext login --email you@pocketcontext.com`; `whoami` and `logout` take
-that same explicit email. The reusable library powers the two pilot app clients.
+that same explicit email. The reusable library powers the supported application clients.
 
 Build the server commit in `POCKETCONTEXT_VERSION` using its documented Go/CGO
 commands. Run from this application directory with isolated storage:

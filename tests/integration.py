@@ -97,11 +97,13 @@ def main():
         shared='Bearer '+session['token']
         assert session['expires']-int(time.time())<=30*86400
         assert req('POST','/api/identity/session',{},shared)['email']=='synthetic@pocketcontext.com'
-        req('POST','/api/identity/assertion',{'audience':'https://evil.example'},shared,expected=400)
-        signed=req('POST','/api/identity/assertion',{'audience':'https://wiki.pocketcontext.com'},shared)['assertion']
-        segment=signed.split('.')[1];claims=json.loads(base64.urlsafe_b64decode(segment+'='*(-len(segment)%4)))
-        assert claims['sub']==user['id'] and claims['exp']-claims['iat']==60 and claims['email_verified'] is True
-        assert 'BEGIN' not in signed
+        for rejected in ('https://evil.example','https://tasks.pocketcontext.com.evil.example','http://crm.pocketcontext.com','https://vault.pocketcontext.com/','https://vault.pocketcontext.com:443'):
+            req('POST','/api/identity/assertion',{'audience':rejected},shared,expected=400)
+        for audience in ('https://wiki.pocketcontext.com','https://notify.pocketcontext.com','https://tasks.pocketcontext.com','https://crm.pocketcontext.com','https://vault.pocketcontext.com'):
+            signed=req('POST','/api/identity/assertion',{'audience':audience},shared)['assertion']
+            segment=signed.split('.')[1];claims=json.loads(base64.urlsafe_b64decode(segment+'='*(-len(segment)%4)))
+            assert claims['sub']==user['id'] and claims['exp']-claims['iat']==60 and claims['email_verified'] is True
+            assert claims['aud']==audience and 'BEGIN' not in signed
         req('POST','/api/identity/logout',{},shared)
         req('POST','/api/identity/session',{},shared,expected=401)
         pending=begin()

@@ -57,6 +57,14 @@ class Client(unittest.TestCase):
             with self.assertRaises(identity.IdentityError):identity.assertion(self.email,'https://wiki.pocketcontext.com.evil.example')
             read.assert_not_called()
 
+    def test_shared_session_issues_each_application_audience(self):
+        identity._save(self.email,{'token':'x'*64})
+        for audience in ('https://wiki.pocketcontext.com','https://notify.pocketcontext.com','https://tasks.pocketcontext.com','https://crm.pocketcontext.com','https://vault.pocketcontext.com'):
+            with self.subTest(audience=audience),patch.object(identity,'_request',return_value={'assertion':'header.payload.signature'}) as send,patch.object(identity.webbrowser,'open') as browser:
+                self.assertEqual(identity.assertion(self.email,audience),'header.payload.signature')
+                send.assert_called_once_with('/api/identity/assertion',{'audience':audience},'x'*64)
+                browser.assert_not_called()
+
     def test_logout_preserves_cache_when_revocation_uncertain(self):
         identity._save(self.email,{'token':'x'*64})
         with patch.object(identity,'_request',side_effect=identity.IdentityError('unavailable')):

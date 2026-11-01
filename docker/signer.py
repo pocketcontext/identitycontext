@@ -68,7 +68,8 @@ def sign(claims, crypto):
     import oci
     expected = {'iss', 'sub', 'email', 'email_verified', 'hd', 'aud', 'iat', 'nbf', 'exp', 'jti'}
     if (not isinstance(claims, dict) or set(claims) != expected or claims['iss'] != 'https://id.pocketcontext.com'
-            or claims['aud'] not in ('https://wiki.pocketcontext.com', 'https://notify.pocketcontext.com')
+            or claims['aud'] not in ('https://wiki.pocketcontext.com', 'https://notify.pocketcontext.com',
+                 'https://tasks.pocketcontext.com', 'https://crm.pocketcontext.com', 'https://vault.pocketcontext.com')
             or claims['email_verified'] is not True or claims['hd'] != 'pocketcontext.com'
             or not isinstance(claims['email'], str) or not claims['email'].endswith('@pocketcontext.com')
             or any(type(claims[k]) is not int for k in ('iat', 'nbf', 'exp'))
