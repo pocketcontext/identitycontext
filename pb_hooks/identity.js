@@ -34,7 +34,7 @@ function approve(e){
    if(user.getBool('disabled')||user.tokenKey()!==e.auth.tokenKey()||record.getBool('used')||record.getInt('expires')<=now()||record.getString('code_hash')) throw new ForbiddenError('Sign-in request is expired or already approved.');
    if(email(user.getString('email'))!==record.getString('email')) throw new ForbiddenError('The Google account does not match the terminal request.');
    code=$security.randomStringWithAlphabet(12,'ABCDEFGHJKLMNPQRSTUVWXYZ23456789');
-   record.set('code_hash',hash(code));record.set('subject',user.id);tx.save(record);
+   record.set('code_hash',hash(code));record.set('account_key_hash',hash(user.tokenKey()));record.set('subject',user.id);tx.save(record);
  });
  return e.json(200,{code:code,expires_in:300});
 }
@@ -53,7 +53,7 @@ function redeem(e){
       request.set('attempts',request.getInt('attempts')+1);tx.save(request);invalid=true;return;
    }
    const user=tx.findRecordById('users',request.getString('subject'));
-   if(user.getBool('disabled')||!user.getBool('verified')||email(user.getString('email'))!==request.getString('email')) throw new ForbiddenError('Account is unavailable.');
+   if(user.getBool('disabled')||!user.getBool('verified')||hash(user.tokenKey())!==request.getString('account_key_hash')||email(user.getString('email'))!==request.getString('email')) throw new ForbiddenError('Account is unavailable.');
    const token=$security.randomString(64),session=new Record(tx.findCollectionByNameOrId('identity_sessions'));
    session.set('token_hash',hash(token));session.set('subject',user.id);session.set('account_key_hash',hash(user.tokenKey()));
    session.set('expires',now()+30*86400);session.set('idle_expires',now()+7*86400);tx.save(session);
@@ -92,12 +92,17 @@ function assertion(e){
  const claims=withSession(e,(_,s,u)=>({iss:ORIGIN,sub:u.id,email:email(u.getString('email')),email_verified:true,hd:'pocketcontext.com',aud:data.audience,iat:now(),nbf:now(),exp:now()+60,jti:$security.randomString(32)}),true);
  return e.json(200,{assertion:sign(claims),expires_in:60});
 }
+function warmKeys(app){
+ try{const cmd=$os.cmd('python3','-I',__hooks+'/../docker/signer.py','jwks');const value=JSON.parse(toString(cmd.output()));if(!Array.isArray(value.keys))throw new Error();app.store().set('identityJWKS',JSON.stringify(value));}catch(_){throw new Error('Identity verification keys could not be loaded; startup stopped.');}
+}
 function jwks(e){
  e.response.header().set('Cache-Control','public, max-age=60');
- try {const cmd=$os.cmd('python3','-I',__hooks+'/../docker/signer.py','jwks');return e.json(200,JSON.parse(toString(cmd.output())));}catch(_){throw new ApiError(503,'Identity verification keys are unavailable.',{});}
+ const cached=e.app.store().get('identityJWKS');
+ if(!cached)throw new ApiError(503,'Identity verification keys are unavailable.',{});
+ return e.json(200,JSON.parse(cached));
 }
 function page(e){
  safe(e);e.response.header().set('Content-Security-Policy',"default-src 'self'; script-src 'self'; connect-src 'self'; style-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
  return e.html(200,toString($os.readFile(__hooks+'/../pb_public/login.html')));
 }
-module.exports={start,approve,redeem,session,logout,assertion,jwks,page};
+module.exports={start,approve,redeem,session,logout,assertion,jwks,page,warmKeys};

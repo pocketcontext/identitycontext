@@ -1,6 +1,7 @@
 migrate((app) => {
   // Configure PocketBase's built-in collection; never create another auth table.
   const users = app.findCollectionByNameOrId("users");
+  users.fields.removeByName('avatar');
   users.fields.add(new BoolField({name: "disabled"}));
   users.fields.add(new TextField({name: "name", required: true, max: 200}));
   users.listRule = null;

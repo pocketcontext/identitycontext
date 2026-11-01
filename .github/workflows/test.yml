@@ -1,0 +1,54 @@
+name: identity integration
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: identitycontext
+          persist-credentials: false
+      - name: Read tested server revision
+        id: server
+        run: |
+          revision=$(cat identitycontext/POCKETCONTEXT_VERSION)
+          [[ "$revision" =~ ^[0-9a-f]{40}$ ]]
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: pocketcontext/pocketcontext
+          ref: ${{ steps.server.outputs.revision }}
+          path: pocketcontext
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: pocketcontext/go.mod
+          cache-dependency-path: pocketcontext/go.sum
+      - name: Build server
+        working-directory: pocketcontext
+        run: CGO_ENABLED=1 go build -tags sqlite_math_functions,sqlite_percentile,sqlite_fts5 -o bin/pocketcontext ./cmd/pocketcontext
+      - name: Install package and signing test dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/identity-python"
+          "$RUNNER_TEMP/identity-python/bin/pip" install ./identitycontext cryptography
+          echo "$RUNNER_TEMP/identity-python/bin" >> "$GITHUB_PATH"
+      - name: Client, signing and recovery tests
+        run: python3 -m unittest discover -s identitycontext/tests -v
+      - name: Hosted protocol and revocation
+        run: python3 identitycontext/tests/integration.py --binary pocketcontext/bin/pocketcontext
+      - name: Google provider adversarial tests
+        run: python3 identitycontext/tests/oauth_integration.py --binary pocketcontext/bin/pocketcontext
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install browser fixture
+        working-directory: identitycontext
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Hosted browser with synthetic provider
+        run: python3 identitycontext/tests/browser.py --binary pocketcontext/bin/pocketcontext

@@ -25,3 +25,24 @@ OCI signing. Production OAuth and HSM verification are separate deployment gates
 Default-users authentication hooks were adapted from RaiseContext; the hosted
 identity protocol and client are independent. The browser vendors PocketBase SDK
 0.28.1 under its MIT license in `pb_public/POCKETBASE-LICENSE.md`.
+
+Full release validation additionally runs:
+
+```sh
+npm ci
+npx playwright install chromium
+python3 tests/browser.py --binary /path/to/pocketcontext
+python3 tests/launcher.py
+uv build
+docker build -t identitycontext:ci .
+python3 docker/smoke.py config --image identitycontext:ci
+python3 docker/smoke.py smoke --image identitycontext:ci
+python3 docker/smoke.py restore --image identitycontext:ci
+```
+
+The signing unit tests require `cryptography`; no OCI credentials are used.
+Browser tests use Playwright and a local synthetic provider, never live Google.
+See [deployment and recovery](docs/deployment.md) before provisioning or releasing.
+The new app's source is public; deployment configuration and all credentials stay
+in the private scaffold. Shared CLI sessions contain sensitive tokens and never
+belong in Git, logs, telemetry or support messages.

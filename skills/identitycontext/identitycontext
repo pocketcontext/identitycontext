@@ -1,0 +1,12 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["pocketcontext-identity"]
+#
+# [tool.uv.sources]
+# pocketcontext-identity = { git = "https://github.com/pocketcontext/identitycontext.git", rev = "f6bb3b147e2e4d9a82b447e54811b959c6543a69" }
+# ///
+"""Standalone shared identity client."""
+from pocketcontext_identity.cli import main
+if __name__ == '__main__':
+    raise SystemExit(main())

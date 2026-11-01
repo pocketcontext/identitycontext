@@ -78,12 +78,12 @@ accounts as well. No automatic downgrade follows central rejection or outage.
 ## Recovery and rotation
 
 Database replicas include identities, revocations and hashed sessions. Keep the
-replica private and use one writer. Restoring stale state may restore old account
-or session status: before reopening a recovered identity service, revoke all
-restored shared sessions and rotate all restored user token keys through
-operator REST writes, then reapply the current offboarding list. Never treat an
-old replica as authoritative for recent revocations. Fresh Google login is then
-required. Recovery must not create another writer on the live replica.
+replica private and use one writer. On replica recovery, the application
+transactionally disables every restored ordinary account, rotates its token key
+and revokes all shared sessions before serving. An operator selectively
+reactivates eligible accounts after checking the current offboarding list. Never
+treat an old replica as authoritative for recent revocations. Fresh Google login
+is then required. Recovery must not create another writer on the live replica.
 
 To rotate KMS, create a new HSM key version, publish its public key before issuing
 assertions with it, retain the previous version in

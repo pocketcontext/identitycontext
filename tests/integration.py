@@ -102,11 +102,18 @@ def main():
         assert 'BEGIN' not in signed
         req('POST','/api/identity/logout',{},shared)
         req('POST','/api/identity/session',{},shared,expected=401)
+        pending=begin()
         fresh=req('POST','/api/identity/login/redeem',begin())
         req('PATCH','/api/collections/users/records/'+user['id'],{'disabled':True},admin)
         req('POST','/api/identity/assertion',{'audience':'https://wiki.pocketcontext.com'},'Bearer '+fresh['token'],expected=401)
         req('PATCH','/api/collections/users/records/'+user['id'],{'disabled':False},admin)
         req('POST','/api/identity/session',{},'Bearer '+fresh['token'],expected=401)
+        req('POST','/api/identity/login/redeem',pending,expected=403)
+        token=req('POST','/api/collections/users/impersonate/'+user['id'],{'duration':300},admin)['token']
+        unverified_pending=begin()
+        req('PATCH','/api/collections/users/records/'+user['id'],{'verified':False},admin)
+        req('PATCH','/api/collections/users/records/'+user['id'],{'verified':True},admin)
+        req('POST','/api/identity/login/redeem',unverified_pending,expected=403)
         req('DELETE','/api/collections/users/records/'+user['id'],token=admin,expected=403)
         assert 'Sign in to PocketContext' in req('GET','/l/synthetic')
     print('PASS: hosted login binding/replay, isolated auth, private protocol storage and disable/re-enable revocation')

@@ -2,6 +2,10 @@
 """OCI HSM signing boundary. stdin/stdout protocol; fixed error messages only."""
 import base64
 import hashlib
+import fcntl
+from pathlib import Path
+import stat
+import tempfile
 import json
 import os
 import signal
@@ -86,12 +90,32 @@ def sign(claims, crypto):
     return message.decode() + '.' + b64(signature)
 
 
+def acquire_slot():
+    # Bound expensive OCI SDK processes before importing it. Excess requests fail
+    # closed immediately instead of multiplying 20-second network waits.
+    directory=Path(tempfile.gettempdir())/'identitycontext-signing'
+    directory.mkdir(mode=0o700,exist_ok=True)
+    info=directory.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid!=os.getuid() or info.st_mode&0o077:
+        raise ValueError('unsafe signing lock directory')
+    for index in range(2):
+        fd=os.open(directory/str(index),os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
+        try:
+            fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+            return fd
+        except BlockingIOError:
+            os.close(fd)
+    raise ValueError('signing capacity exceeded')
+
+
 def main():
     def timeout(*_):
         raise TimeoutError()
     signal.signal(signal.SIGALRM, timeout)
     signal.alarm(20)
+    slot=None
     try:
+        slot=acquire_slot()
         crypto, management = clients()
         if sys.argv[1:] == ['jwks']:
             print(json.dumps(jwks(management)))
@@ -106,6 +130,7 @@ def main():
         print('Identity signing operation failed.', file=sys.stderr)
         return 1
     finally:
+        if slot is not None:os.close(slot)
         signal.alarm(0)
     return 0
 

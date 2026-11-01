@@ -49,6 +49,14 @@ def google_fixture():
             self.reply(200, {'access_token': token, 'token_type': 'Bearer', 'expires_in': 3600})
 
         def do_GET(self):
+            if self.path.startswith('/authorize?'):
+                query=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+                code=secrets.token_urlsafe(24)
+                codes[code]={'challenge':query['code_challenge'][0],'user':{'sub':'browser-synthetic','email':'member@pocketcontext.com','email_verified':True,'hd':'pocketcontext.com','name':'Synthetic Browser'}}
+                self.send_response(302)
+                self.send_header('Location',REDIRECT+'?'+urllib.parse.urlencode({'code':code,'state':query['state'][0]}))
+                self.end_headers()
+                return
             user = tokens.get(self.headers.get('Authorization', '').removeprefix('Bearer '))
             if self.path != '/userinfo' or user is None:
                 return self.reply(401, {})

@@ -8,7 +8,7 @@ function configure(app){
  const settings=app.settings();
  settings.meta.appName='IdentityContext';settings.meta.appURL='https://id.pocketcontext.com';
  settings.rateLimits.enabled=$os.getenv('IDENTITYCONTEXT_RATE_LIMITS')!=='false';
- settings.rateLimits.rules=[{label:'/api/identity/login/',audience:'',duration:60,maxRequests:10},{label:'/api/identity/',audience:'',duration:60,maxRequests:60},{label:'*:auth',audience:'',duration:60,maxRequests:10}];
+ settings.rateLimits.rules=[{label:'/api/identity/login/',audience:'',duration:60,maxRequests:10},{label:'/api/identity/',audience:'',duration:60,maxRequests:60},{label:'*:auth',audience:'',duration:60,maxRequests:10},{label:'/',audience:'',duration:60,maxRequests:300}];
  const header=$os.getenv('IDENTITYCONTEXT_TRUSTED_PROXY_HEADER');
  if(header){settings.trustedProxy.headers=[header];settings.trustedProxy.useLeftmostIP=false;}
  app.save(settings);

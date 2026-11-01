@@ -5,6 +5,7 @@ migrate((app) => {
       new TextField({name:'email',required:true,max:254}),
       new TextField({name:'challenge',required:true,max:128}),
       new TextField({name:'code_hash',max:128}),
+      new TextField({name:'account_key_hash',max:128}),
       new RelationField({name:'subject',collectionId:app.findCollectionByNameOrId('users').id,maxSelect:1}),
       new NumberField({name:'expires',required:true}),
       new NumberField({name:'attempts'}),

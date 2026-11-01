@@ -1,0 +1,14 @@
+*
+!POCKETCONTEXT_VERSION
+!pocketcontext.json
+!pb_migrations/*.js
+!pb_hooks/*.js
+!pb_public/*.html
+!pb_public/*.css
+!pb_public/*.js
+!pb_public/*.mjs
+!pb_public/POCKETBASE-LICENSE.md
+!docker/entrypoint.py
+!docker/litestream.yml
+!docker/signer.py
+!docker/requirements-signing.txt
