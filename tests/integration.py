@@ -79,6 +79,8 @@ def main():
         assert 'identity_sessions' not in json.dumps(schema) and 'identity_requests' not in json.dumps(schema)
         for name in ('identity_sessions','identity_requests'):
             req('GET','/api/collections/'+name+'/records',token=token,expected=403)
+        for endpoint in ('login/start','login/redeem','login/approve','assertion'):
+            req('POST','/api/identity/'+endpoint,{'oversized':'x'*5000},token,expected=413)
         verifier='v'*64
         challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip('=')
         def begin():

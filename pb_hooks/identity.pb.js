@@ -1,10 +1,10 @@
 onBootstrap(e=>{e.next();require(`${__hooks}/identity.js`).warmKeys(e.app);});
-routerAdd('POST','/api/identity/login/start',e=>require(`${__hooks}/identity.js`).start(e));
-routerAdd('POST','/api/identity/login/approve',e=>require(`${__hooks}/identity.js`).approve(e),$apis.requireAuth('users'));
-routerAdd('POST','/api/identity/login/redeem',e=>require(`${__hooks}/identity.js`).redeem(e));
-routerAdd('POST','/api/identity/session',e=>require(`${__hooks}/identity.js`).session(e));
-routerAdd('POST','/api/identity/assertion',e=>require(`${__hooks}/identity.js`).assertion(e));
-routerAdd('POST','/api/identity/logout',e=>require(`${__hooks}/identity.js`).logout(e));
+routerAdd('POST','/api/identity/login/start',e=>require(`${__hooks}/identity.js`).start(e),$apis.bodyLimit(4096));
+routerAdd('POST','/api/identity/login/approve',e=>require(`${__hooks}/identity.js`).approve(e),$apis.requireAuth('users'),$apis.bodyLimit(4096));
+routerAdd('POST','/api/identity/login/redeem',e=>require(`${__hooks}/identity.js`).redeem(e),$apis.bodyLimit(4096));
+routerAdd('POST','/api/identity/session',e=>require(`${__hooks}/identity.js`).session(e),$apis.bodyLimit(4096));
+routerAdd('POST','/api/identity/assertion',e=>require(`${__hooks}/identity.js`).assertion(e),$apis.bodyLimit(4096));
+routerAdd('POST','/api/identity/logout',e=>require(`${__hooks}/identity.js`).logout(e),$apis.bodyLimit(4096));
 routerAdd('GET','/.well-known/jwks.json',e=>require(`${__hooks}/identity.js`).jwks(e));
 routerAdd('GET','/l/{request}',e=>require(`${__hooks}/identity.js`).page(e));
 // Purge expired protocol records without retaining login codes or session hashes.
