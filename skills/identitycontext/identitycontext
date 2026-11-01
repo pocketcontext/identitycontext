@@ -4,7 +4,7 @@
 # dependencies = ["pocketcontext-identity"]
 #
 # [tool.uv.sources]
-# pocketcontext-identity = { git = "https://github.com/pocketcontext/identitycontext.git", rev = "f6bb3b147e2e4d9a82b447e54811b959c6543a69" }
+# pocketcontext-identity = { git = "https://github.com/pocketcontext/identitycontext.git", rev = "ffce6425e24dae7b5576c4de3ae2935223b247cb" }
 # ///
 """Standalone shared identity client."""
 from pocketcontext_identity.cli import main
