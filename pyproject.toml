@@ -1,0 +1,12 @@
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"
+[project]
+name = "pocketcontext-identity"
+version = "0.1.0"
+description = "Shared hosted identity sessions for Context application CLIs"
+requires-python = ">=3.11"
+[project.scripts]
+identitycontext = "pocketcontext_identity.cli:main"
+[tool.hatch.build.targets.wheel]
+packages = ["src/pocketcontext_identity"]

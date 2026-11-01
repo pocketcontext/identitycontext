@@ -1,0 +1,1 @@
+{"authCollection":"users","tables":{"identity_info":["id","service"]},"timeoutMs":2000,"maxRows":100,"maxBytes":1048576}
