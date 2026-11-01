@@ -20,7 +20,10 @@ def main():
         else:
             result = _request('/api/identity/session', {}, _read(args.email)['token'])
         print(json.dumps(result))
-    except IdentityError as error:
+    except KeyboardInterrupt:
+        print('Identity command cancelled.', file=sys.stderr)
+        return 130
+    except (IdentityError, OSError) as error:
         print(str(error), file=sys.stderr)
         return 1
     return 0

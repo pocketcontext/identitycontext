@@ -4,6 +4,7 @@ No provider tokens, automatic browser renewal or automatic fallback authenticati
 """
 import base64
 import getpass
+import functools
 import hashlib
 import json
 import os
@@ -119,6 +120,18 @@ def _save(email, value):
             os.unlink(temporary)
 
 
+def _safe_io(function):
+    @functools.wraps(function)
+    def wrapped(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except OSError:
+            raise IdentityError('Cannot access private identity state or terminal input.') from None
+    return wrapped
+
+
+@_safe_io
+
 def login(email, *, no_browser=False, timeout=180):
     """Reuse an active session or interactively sign in. Return safe account details."""
     email = _email(email)
@@ -176,6 +189,7 @@ def login(email, *, no_browser=False, timeout=180):
     return {key: value for key, value in result.items() if key != 'token'}
 
 
+@_safe_io
 def assertion(email, audience):
     """Issue a single-use assertion; never prompt or fall back to Google/password."""
     if audience not in AUDIENCES:
@@ -188,6 +202,7 @@ def assertion(email, audience):
     return token
 
 
+@_safe_io
 def logout(email):
     """Revoke the shared session on the server before deleting its local copy."""
     try:
