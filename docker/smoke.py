@@ -74,7 +74,11 @@ def main():
             command('run','--rm',*common,args.image,'init',env=env)
             def start():
                 command('run','-d','--name',app,'-p','127.0.0.1::80',*common,args.image,env=env)
-                return ready(app)
+                address = ready(app)
+                output = command('logs', app)
+                assert any('starting L0 retention monitor' in line and 'interval=5m0s' in line
+                           for line in (output.stdout + output.stderr).splitlines()), 'Litestream L0 cleanup interval must be five minutes'
+                return address
             address=start()
             def admin_token():return http(address,'/api/collections/_superusers/auth-with-password',{'identity':'admin@example.test','password':password})['token']
             admin=admin_token()
